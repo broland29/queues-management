@@ -119,6 +119,10 @@ public class SimulationFrame extends JFrame {
         mainFrame.setVisible(true);
     }
 
+    public void redraw(){
+
+    }
+
     public static void main(String[] args) {
         new SimulationFrame();
     }

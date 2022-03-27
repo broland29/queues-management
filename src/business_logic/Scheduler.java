@@ -3,6 +3,7 @@ package business_logic;
 import model.Server;
 import model.Task;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Scheduler {
@@ -12,8 +13,21 @@ public class Scheduler {
     private int maxTasksPerServer;
     private Strategy strategy;
 
-    public Scheduler(int maxNoServers, int maxTasksPerServer){
+    private List<Thread> serverThreads;     //???
 
+    public Scheduler(int maxNoServers, int maxTasksPerServer){
+        //make sure nothing is null
+        this.maxNoServers = maxNoServers;
+        this.maxTasksPerServer = maxTasksPerServer;
+        serverThreads = new ArrayList<>();
+
+        //create server objects and threads from them
+        servers = new ArrayList<>();
+        for(int i=0; i<maxNoServers; i++){
+            servers.add(new Server(i,maxTasksPerServer));
+            serverThreads.add(new Thread(servers.get(i)));
+            serverThreads.get(i).start();
+        }
     }
 
     public void changeStrategy(SelectionPolicy policy){
@@ -26,7 +40,7 @@ public class Scheduler {
     }
 
     public void dispatchTask(Task t){
-
+        strategy.addTask(servers,t);
     }
 
     public  List<Server> getServers(){
