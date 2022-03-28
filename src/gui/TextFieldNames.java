@@ -1,0 +1,11 @@
+package gui;
+
+public enum TextFieldNames {
+    CLIENT_COUNT,
+    QUEUE_COUNT,
+    MAX_TIME,
+    ARRIVAL_INTERVAL_FROM,
+    ARRIVAL_INTERVAL_TO,
+    SERVICE_INTERVAL_FROM,
+    SERVICE_INTERVAL_TO
+}

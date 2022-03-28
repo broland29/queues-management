@@ -1,6 +1,7 @@
 package business_logic;
 
-import gui.SimulationFrame;
+import gui.Controller;
+import gui.SetupFrame;
 import model.Server;
 import model.Task;
 
@@ -9,6 +10,12 @@ import java.util.Comparator;
 import java.util.List;
 
 public class SimulationManager implements Runnable{
+    //limits defined in order to avoid huge simulations
+    public static final int MAX_TIME_LIMIT = 200;
+    public static final int MAX_NUMBER_OF_CLIENTS = 1000;
+    public static final int MAX_NUMBER_OF_SERVERS = 20;
+
+    private SimulationStatus simulationStatus = SimulationStatus.WAITING_FOR_INFO;
 
     public int timeLimit = 20;
     public static int maxProcessingTime = 5;
@@ -18,7 +25,8 @@ public class SimulationManager implements Runnable{
     public SelectionPolicy selectionPolicy = SelectionPolicy.SHORTEST_TIME;
 
     private Scheduler scheduler;        //queue management and client distribution
-    private SimulationFrame frame;      //graphical user interface
+    private SetupFrame frame;      //graphical user interface
+    private Controller controller;
     private List<Task> generatedTasks;  //pool of tasks
 
     public static final int SECOND = 200;
@@ -26,7 +34,8 @@ public class SimulationManager implements Runnable{
 
     public SimulationManager(){
         scheduler = new Scheduler(numberOfServers,20);  //TODO: find out what value
-        frame = new SimulationFrame();
+        frame = new SetupFrame();
+        controller = new Controller(this);
         generatedTasks = new ArrayList<>();
 
         generateNRandomTask();
@@ -100,12 +109,21 @@ public class SimulationManager implements Runnable{
                 else{
                     System.out.println("Tasks not finished.");
                 }
-                frame.close();
+
+                //prepare for next simulation
+                simulationStatus = SimulationStatus.WAITING_FOR_INFO;
+                frame.setMessage("Validate");
+                frame.enableButton();
+                //frame.close();
                 break;
             }
             if (isJobDone()){
                 System.out.println("Tasks finished before reaching time limit (" + timeLimit + ").");
-                frame.close();
+                //prepare for next simulation
+                simulationStatus = SimulationStatus.WAITING_FOR_INFO;
+                frame.setMessage("Validate");
+                frame.enableButton();
+                //frame.close();
                 break;
             }
         }
@@ -149,10 +167,22 @@ public class SimulationManager implements Runnable{
         System.out.println("\n----------------------------------------\n");
     }
 
+    public SimulationStatus getSimulationStatus() {
+        return simulationStatus;
+    }
+
+    public void setSimulationStatus(SimulationStatus simulationStatus) {
+        this.simulationStatus = simulationStatus;
+    }
+
     public static void main(String[] args) {
 
         SimulationManager gen = new SimulationManager();
         Thread t = new Thread(gen);
         t.start();
+    }
+
+    public SetupFrame getFrame() {
+        return frame;
     }
 }
