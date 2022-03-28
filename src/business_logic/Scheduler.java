@@ -19,12 +19,13 @@ public class Scheduler {
         //make sure nothing is null
         this.maxNoServers = maxNoServers;
         this.maxTasksPerServer = maxTasksPerServer;
+        strategy = new ConcreteStrategyQueue();
         serverThreads = new ArrayList<>();
 
         //create server objects and threads from them
         servers = new ArrayList<>();
         for(int i=0; i<maxNoServers; i++){
-            servers.add(new Server(i,maxTasksPerServer));
+            servers.add(new Server(maxTasksPerServer,i));
             serverThreads.add(new Thread(servers.get(i)));
             serverThreads.get(i).start();
         }
@@ -45,5 +46,13 @@ public class Scheduler {
 
     public  List<Server> getServers(){
         return servers;
+    }
+
+    public boolean areServersEmpty(){
+        for (Server s : servers){
+            if (!s.isEmpty())
+                return false;
+        }
+        return true;
     }
 }

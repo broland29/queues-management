@@ -1,5 +1,7 @@
 package model;
 
+import business_logic.SimulationManager;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -7,13 +9,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Server implements Runnable{
     private BlockingQueue<Task> tasks;
     private AtomicInteger waitingPeriod;
+    private final int id;
 
-    final private int serverNumber;
-
-    public Server(int serverNumber, int maxTasksPerServer){
-        waitingPeriod = new AtomicInteger(0);
+    public Server(int maxTasksPerServer, int id){
         tasks = new ArrayBlockingQueue<Task>(maxTasksPerServer);
-        this.serverNumber = serverNumber;
+        waitingPeriod = new AtomicInteger(0);
+        this.id = id;
     }
 
     public void addTask(Task newTask){
@@ -22,14 +23,21 @@ public class Server implements Runnable{
     }
 
     public void run(){
-        //printServer();
         while(true){
             try {
-                Task currentTask = tasks.take();
-                Thread.sleep(currentTask.getServiceTime());
-                waitingPeriod.getAndAdd(-currentTask.getServiceTime());
+                Task currentTask = tasks.peek();
+
+                if (currentTask != null){
+                    while (currentTask.getServiceTime() != 0){
+                        Thread.sleep(SimulationManager.SECOND);
+                        currentTask.decrementServiceTime();
+                    }
+
+                    tasks.remove(currentTask);
+                }
+
             } catch (InterruptedException e) {
-                System.out.println("Server " + serverNumber + " was interrupted.");
+                System.out.println("Server " + id + " was interrupted.");
             }
         }
     }
@@ -39,7 +47,7 @@ public class Server implements Runnable{
     }
 
     public void printServer(){
-        System.out.println("Server: " + serverNumber);
+        System.out.println("Server: " + id);
     }
 
     public int getWaitingPeriod() {
@@ -48,5 +56,13 @@ public class Server implements Runnable{
 
     public int getQueueSize(){
         return tasks.size();
+    }
+
+    public boolean isEmpty(){
+        return tasks.isEmpty();
+    }
+
+    public int getId() {
+        return id;
     }
 }

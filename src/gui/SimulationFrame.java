@@ -123,7 +123,11 @@ public class SimulationFrame extends JFrame {
 
     }
 
-    public static void main(String[] args) {
-        new SimulationFrame();
+    public void close(){
+        this.dispose();
     }
+
+    //public static void main(String[] args) {
+    //    new SimulationFrame();
+    //}
 }
