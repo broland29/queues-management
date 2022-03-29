@@ -156,10 +156,6 @@ public class SetupFrame extends JFrame {
         mainFrame.setVisible(true);
     }
 
-    public void redraw(){
-
-    }
-
     public void close(){
         this.dispose();
     }
@@ -167,12 +163,6 @@ public class SetupFrame extends JFrame {
     public void addButtonListener(ActionListener bl){
         validateAndStartButton.addActionListener(bl);
         helpAndHaltButton.addActionListener(bl);
-    }
-
-    public static void main(String[] args) {
-
-        SimulationManager sm = new SimulationManager();
-        //new Controller(new SetupFrame());
     }
 
     public JButton getValidateAndStartButton() {

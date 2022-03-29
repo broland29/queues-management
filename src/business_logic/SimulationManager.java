@@ -2,6 +2,7 @@ package business_logic;
 
 import gui.Controller;
 import gui.SetupFrame;
+import gui.SimulationFrame;
 import model.Server;
 import model.Task;
 
@@ -14,6 +15,7 @@ public class SimulationManager implements Runnable{
     public static final int MAX_TIME_LIMIT = 200;
     public static final int MAX_NUMBER_OF_CLIENTS = 1000;
     public static final int MAX_NUMBER_OF_SERVERS = 20;
+    public static final int MAX_QUEUE_CAPACITY = 5;
 
     private SimulationStatus simulationStatus = SimulationStatus.WAITING_FOR_INFO;
 
@@ -26,19 +28,42 @@ public class SimulationManager implements Runnable{
 
     private Scheduler scheduler;        //queue management and client distribution
     private SetupFrame frame;      //graphical user interface
+    private SimulationFrame simulationFrame;
     private Controller controller;
     private List<Task> generatedTasks;  //pool of tasks
 
-    public static final int SECOND = 200;
+    public static final int SECOND = 3000;
     public static final int LOG_WIDTH = 3;
 
     public SimulationManager(){
-        scheduler = new Scheduler(numberOfServers,20);  //TODO: find out what value
+        //scheduler = new Scheduler(numberOfServers,20);  //TODO: find out what value
         frame = new SetupFrame();
+//        controller = new Controller(this);
+        generatedTasks = new ArrayList<>();
+//
+//        generateNRandomTask();
+    }
+
+    public SimulationManager(int clientCount, int queueCount, int maxTime,
+                             int arrivalIntervalFrom, int arrivalIntervalTo,
+                             int serviceIntervalFrom, int serviceIntervalTo){
+
+        //TODO: meh
+        frame = new SetupFrame();
+        simulationStatus = SimulationStatus.RUNNING;
+
+        numberOfClients = clientCount;
+        numberOfServers = queueCount;
+        timeLimit = maxTime;
+        minProcessingTime = serviceIntervalFrom;
+        maxProcessingTime = serviceIntervalTo;
+
+        scheduler = new Scheduler(numberOfServers,5);  //TODO: find out what value
+        simulationFrame = new SimulationFrame(numberOfServers,5);
         controller = new Controller(this);
         generatedTasks = new ArrayList<>();
 
-        generateNRandomTask();
+        generateNRandomTask(arrivalIntervalFrom,arrivalIntervalTo);
     }
 
     //comparator for sorting generated tasks
@@ -49,14 +74,14 @@ public class SimulationManager implements Runnable{
         }
     }
 
-    private void generateNRandomTask(){
+    private void generateNRandomTask(int minArrivalTime, int maxArrivalTime){
 
         //generate random tasks
         for (int i=0; i<numberOfClients; i++){
             //random processing time, in [minProcessingTime,maxProcessingTime]
             int serviceTime = (int) ((Math.random() * (maxProcessingTime - minProcessingTime)) + minProcessingTime);
             //random arrival time, in [1,timeLimit]
-            int arrivalTime = (int) (Math.random() * (timeLimit - 1) + 1);
+            int arrivalTime = (int) (Math.random() * (maxArrivalTime - minArrivalTime) + minArrivalTime);
             generatedTasks.add(new Task(arrivalTime,serviceTime,i));
         }
 
@@ -76,56 +101,58 @@ public class SimulationManager implements Runnable{
     public void run(){
         int currentTime = 0;
         while (true){
-            //System.out.println(currentTime);
 
-            int i = 0;
-            while(i<generatedTasks.size()){
-                Task t = generatedTasks.get(i);
-                if (t.getArrivalTime() == currentTime){
-                    scheduler.dispatchTask(t);
-                    generatedTasks.remove(t);
+            if(simulationStatus == SimulationStatus.RUNNING){
+                int i = 0;
+                while(i<generatedTasks.size()){
+                    Task t = generatedTasks.get(i);
+                    if (t.getArrivalTime() == currentTime){
+                        scheduler.dispatchTask(t);
+                        generatedTasks.remove(t);
+                    }
+                    else{
+                        i++; //TODO: can break?
+                    }
                 }
-                else{
-                    i++; //TODO: can break?
+
+                printLog(currentTime);
+                if (simulationStatus == SimulationStatus.RUNNING)
+                    simulationFrame.reDraw(currentTime,generatedTasks,scheduler.getServers());
+
+                try {
+                    Thread.sleep(SECOND);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            }
 
-            frame.redraw();
-            printLog(currentTime);
+                currentTime++;
 
-            try {
-                Thread.sleep(SECOND);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+                if (currentTime == timeLimit){
+                    System.out.println("Time limit reached (" + timeLimit + ").");
+                    if (isJobDone()){
+                        System.out.println("Tasks finished.");
+                    }
+                    else{
+                        System.out.println("Tasks not finished.");
+                    }
 
-            currentTime++;
-
-            if (currentTime == timeLimit){
-                System.out.println("Time limit reached (" + timeLimit + ").");
+                    //prepare for next simulation
+                    simulationStatus = SimulationStatus.WAITING_FOR_INFO;
+                    frame.setMessage("Validate");
+                    break;
+                }
                 if (isJobDone()){
-                    System.out.println("Tasks finished.");
+                    System.out.println("Tasks finished before reaching time limit (" + timeLimit + ").");
+                    //prepare for next simulation
+                    simulationStatus = SimulationStatus.WAITING_FOR_INFO;
+                    frame.setMessage("Validate");
+                    break;
                 }
-                else{
-                    System.out.println("Tasks not finished.");
-                }
-
-                //prepare for next simulation
-                simulationStatus = SimulationStatus.WAITING_FOR_INFO;
-                frame.setMessage("Validate");
-                frame.enableButton();
-                //frame.close();
-                break;
             }
-            if (isJobDone()){
-                System.out.println("Tasks finished before reaching time limit (" + timeLimit + ").");
-                //prepare for next simulation
-                simulationStatus = SimulationStatus.WAITING_FOR_INFO;
-                frame.setMessage("Validate");
-                frame.enableButton();
-                //frame.close();
-                break;
-            }
+            //else{
+                //System.out.println("Not running...");
+            //}
+            //System.out.println(simulationStatus);
         }
     }
 
@@ -178,6 +205,16 @@ public class SimulationManager implements Runnable{
     public static void main(String[] args) {
 
         SimulationManager gen = new SimulationManager();
+
+        new Controller(gen);
+        Thread t = new Thread(gen);
+        t.start();
+    }
+
+    public static void startSimulation(int clientCount, int queueCount, int maxTime,
+                                int arrivalIntervalFrom, int arrivalIntervalTo,
+                                int serviceIntervalFrom, int serviceIntervalTo){
+        SimulationManager gen = new SimulationManager(clientCount, queueCount, maxTime, arrivalIntervalFrom, arrivalIntervalTo, serviceIntervalFrom, serviceIntervalTo);
         Thread t = new Thread(gen);
         t.start();
     }
