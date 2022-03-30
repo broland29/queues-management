@@ -1,5 +1,8 @@
 package business_logic;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -43,7 +46,7 @@ public class SimulationManager implements Runnable{
     private List<Task> generatedTasks;
 
     //hard-coded simulation customization
-    private static final int SECOND = 1000;
+    private static final int SECOND = 100;
     private static final int LOG_WIDTH = 10;
 
     //data needed to show details after simulation
@@ -121,6 +124,14 @@ public class SimulationManager implements Runnable{
 
         int currentTime = 0;
 
+        BufferedWriter bufferedWriter;
+        try {
+            bufferedWriter = new BufferedWriter(new FileWriter("log.txt"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
         while (true){
             //System.out.println(simulationStatus);
             if(simulationStatus == SimulationStatus.RUNNING){
@@ -145,7 +156,8 @@ public class SimulationManager implements Runnable{
 
                 }
 
-                printLog(currentTime);
+                printLog(currentTime,bufferedWriter);
+
                 if (simulationStatus == SimulationStatus.RUNNING)
                     simulationFrame.reDraw(currentTime,generatedTasks,scheduler.getServers());
                 scheduler.updateDetails(this,currentTime);
@@ -156,21 +168,21 @@ public class SimulationManager implements Runnable{
                     e.printStackTrace();
                 }
 
-                if (isJobDone()){
-                    String terminationCause = "Finished. " + currentTime + " seconds used out of " + timeLimit + ".";
-                    System.out.println(terminationCause);
+                if (isJobDone() || currentTime == timeLimit){
+                    String terminationCause;
 
-                    simulationFrame.reDraw(currentTime,generatedTasks,scheduler.getServers());  //TODO: needed? else tasks not in last status
-                    simulationFrame.reDrawFinal(terminationCause,getAverageWaitingTime(),peakHour,getAverageServiceTime());
+                    if (isJobDone())
+                        terminationCause = "Finished. " + currentTime + " seconds used out of " + timeLimit + ".";
+                    else
+                        terminationCause = "Time limit reached. Tasks not finished";
 
-                    //prepare for next simulation
-                    simulationStatus = SimulationStatus.WAITING_FOR_INFO;
-                    setupFrame.setMessage("Validate");
-                }
-                else if (currentTime == timeLimit){
-                    String terminationCause = "Time limit reached. Tasks not finished";
+                    printDetails(bufferedWriter,terminationCause);
 
-                    System.out.println(terminationCause);
+                    try {
+                        bufferedWriter.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
                     simulationFrame.reDraw(currentTime,generatedTasks,scheduler.getServers());  //TODO: needed? else tasks not in last status
                     simulationFrame.reDrawFinal(terminationCause,getAverageWaitingTime(),peakHour,getAverageServiceTime());
@@ -183,46 +195,76 @@ public class SimulationManager implements Runnable{
                 currentTime++;
                 notifyServers();
             }
-            //System.out.println(simulationStatus);
         }
     }
 
-    private void printLog(int currentTime) {
-        System.out.printf("Time: %d\n\n", currentTime);
-        System.out.println("Waiting clients: ");
+    private void printLog(int currentTime, BufferedWriter bufferedWriter){
+        printLogLine(bufferedWriter,String.format("Time: %d\n", currentTime));
+        printLogLine(bufferedWriter,"Waiting clients:");
 
         int inOneRow = 0;
+
         for (Task t : generatedTasks) {
-            System.out.printf("(%d,%d,%d)   ", t.getId(), t.getArrivalTime(), t.getServiceTime());
+            printLogLineWithoutNewLine(bufferedWriter,String.format("(%d,%d,%d)   ", t.getId(), t.getArrivalTime(), t.getServiceTime()));
             inOneRow++;
             if (inOneRow == LOG_WIDTH) {
-                System.out.println();
+                printLogLine(bufferedWriter,"");//new line
                 inOneRow = 0;
             }
         }
 
-        System.out.println();
-        if (inOneRow != 0)
-            System.out.println();
+        printLogLine(bufferedWriter,"");
+        if (inOneRow != 0){
+            printLogLine(bufferedWriter,"");
+        }
 
         for (Server s : scheduler.getServers()) {
-            System.out.println("Queue " + s.getId() + ":");
+            printLogLine(bufferedWriter,"Queue " + s.getId() + ":");
+
             if (s.isEmpty()) {
-                System.out.println("closed");
+                printLogLine(bufferedWriter,"closed");
             } else {
                 inOneRow = 0;
                 for (Task t : s.getTasks()) {
-                    System.out.printf("(%d,%d,%d)   ", t.getId(), t.getArrivalTime(), t.getServiceTime());
+
+                    printLogLineWithoutNewLine(bufferedWriter,String.format("(%d,%d,%d)   ", t.getId(), t.getArrivalTime(), t.getServiceTime()));
                     inOneRow++;
+
                     if (inOneRow == LOG_WIDTH) {
-                        System.out.println();
+                        printLogLine(bufferedWriter,"");
                         inOneRow = 0;
                     }
                 }
-                System.out.println();
+                printLogLine(bufferedWriter,"");
             }
         }
-        System.out.println("\n----------------------------------------\n");
+        printLogLine(bufferedWriter,"\n----------------------------------------\n");
+    }
+
+    private void printLogLine(BufferedWriter bufferedWriter, String line){
+        System.out.println(line);
+        try {
+            bufferedWriter.write(line + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void printLogLineWithoutNewLine(BufferedWriter bufferedWriter, String line){
+        System.out.print(line);
+        try {
+            bufferedWriter.write(line);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void printDetails(BufferedWriter bufferedWriter, String terminationCause){
+            printLogLine(bufferedWriter,terminationCause + "\n");
+            printLogLine(bufferedWriter,"Average waiting time: " + getAverageWaitingTime());
+            printLogLine(bufferedWriter,"Peak hour: " + peakHour);
+            printLogLine(bufferedWriter,"Average service time: " + getAverageServiceTime() + "\n");
+            printLogLine(bufferedWriter,"Copyright: broland29");
     }
 
     public SimulationStatus getSimulationStatus() {
@@ -257,11 +299,13 @@ public class SimulationManager implements Runnable{
     }
 
     private double getAverageWaitingTime() {
-        return (double)totalWaitingTime / satisfiedClients;
+        double avg = (double)totalWaitingTime / satisfiedClients;
+        return Math.round(avg * 100.0) / 100.0;
     }
 
     private double getAverageServiceTime() {
-        return (double)totalServiceTime / satisfiedClients;
+        double avg =  (double)totalServiceTime / satisfiedClients;
+        return Math.round(avg * 100.0) / 100.0;
     }
 
     public static void main(String[] args) {
