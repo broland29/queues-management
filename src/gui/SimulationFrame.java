@@ -6,9 +6,7 @@ import model.Task;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
@@ -21,8 +19,7 @@ public class SimulationFrame extends JFrame {
     private final Font titleFont = new Font(Font.SANS_SERIF,Font.PLAIN,30);
     private final Font smallerFont = new Font(Font.SANS_SERIF,Font.PLAIN,20);
     private final Font smallestFont = new Font(Font.SANS_SERIF,Font.PLAIN,15);
-    private final Border border = BorderFactory.createLineBorder(Color.black);
-    //private final Border border = BorderFactory.createMatteBorder(2, 1, 2, 1, Color.BLACK);
+    private final Border border = BorderFactory.createLineBorder(new Color(103, 89, 94));
     private final int WAITING_WIDTH = 5;
 
     //information needed to display data
@@ -60,28 +57,35 @@ public class SimulationFrame extends JFrame {
 
         contentPane = new JPanel();
         contentPane.setLayout(new BorderLayout());
-        contentPane.setBackground(Color.BLACK);
+        contentPane.setBackground(new Color(103, 89, 94));
 
 
         headerPanel = new JPanel();
-        headerPanel.setBackground(Color.BLUE);
+        //headerPanel.setBackground(Color.BLUE);
+        headerPanel.setOpaque(false);
         headerPanel.setLayout(new GridLayout(2,1));
 
         headerPanelUp = new JPanel();
+        headerPanelUp.setOpaque(false);
         headerPanelUp.setLayout(new GridBagLayout());
         titleLabel = new JLabel("Simulation Info");
         titleLabel.setFont(titleFont);
+        titleLabel.setForeground(new Color(220, 174, 150));
         headerPanelUp.add(titleLabel);
 
         headerPanelDown = new JPanel();
+        headerPanelDown.setOpaque(false);
         headerPanelDown.setLayout(new GridLayout(1,3));
         leftLabel = new JLabel();
         leftLabel.setHorizontalAlignment(JLabel.CENTER);
+        leftLabel.setForeground(new Color(220, 174, 150));
         middleLabel = new JLabel();
         middleLabel.setFont(smallerFont);
         middleLabel.setHorizontalAlignment(JLabel.CENTER);
+        middleLabel.setForeground(new Color(220, 174, 150));
         rightLabel = new JLabel();
         rightLabel.setHorizontalAlignment(JLabel.CENTER);
+        rightLabel.setForeground(new Color(220, 174, 150));
         headerPanelDown.add(leftLabel);
         headerPanelDown.add(middleLabel);
         headerPanelDown.add(rightLabel);
@@ -91,18 +95,20 @@ public class SimulationFrame extends JFrame {
 
 
         queuesPanel = new JPanel();
+        queuesPanel.setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, new Color(103, 89, 94)));
         queuesPanel.setLayout(new GridLayout(1,numberOfQueues));
         separateQueuePanels = new JPanel[numberOfQueues];
         for (int i=0; i<numberOfQueues; i++){
             separateQueuePanels[i] = new JPanel();
             if (i % 2 == 0)
-                separateQueuePanels[i].setBackground(Color.ORANGE);
+                separateQueuePanels[i].setBackground(new Color(220, 174, 150));
             else
-                separateQueuePanels[i].setBackground(Color.PINK);
+                separateQueuePanels[i].setBackground(new Color(164, 147, 147));
             separateQueuePanels[i].setLayout(new GridLayout(capacityOfQueues + 1,1));
             queuesPanel.add(separateQueuePanels[i]);
         }
-        queuesPanel.setBackground(Color.GREEN);
+        //queuesPanel.setBackground(Color.GREEN);
+        queuesPanel.setOpaque(false);
 
         smallLabels = new JLabel[capacityOfQueues + 1][numberOfQueues];
         for (int i=0; i<numberOfQueues; i++){
@@ -122,8 +128,10 @@ public class SimulationFrame extends JFrame {
         footerPanel = new JPanel();
         footerLabel = new JLabel("Waiting tasks:");
         footerLabel.setFont(smallestFont);
+        footerLabel.setForeground(new Color(220, 174, 150));
         footerPanel.add(footerLabel);
-        footerPanel.setBackground(Color.MAGENTA);
+        footerPanel.setOpaque(false);
+       // footerPanel.setBackground(Color.MAGENTA);
 
         contentPane.add(headerPanel,BorderLayout.NORTH);
         contentPane.add(queuesPanel,BorderLayout.CENTER);
@@ -186,5 +194,9 @@ public class SimulationFrame extends JFrame {
         rightLabel.setText("Average service time: " + averageServiceTime);
 
         footerLabel.setText("");
+    }
+
+    public static void main(String[] args) {
+        new SimulationFrame(3,3);
     }
 }

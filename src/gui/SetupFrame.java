@@ -58,34 +58,41 @@ public class SetupFrame extends JFrame {
 
         contentPane = new JPanel();
         contentPane.setLayout(new GridLayout(5,1));
-        contentPane.setBackground(new Color(255,0,0));
+        contentPane.setBackground(new Color(103, 89, 94));
 
         //titlePanel
         titlePanel = new JPanel();
-        titlePanel.setBackground(new Color(0,150,0));
+        //titlePanel.setBackground(new Color(0,150,0));
+        titlePanel.setOpaque(false);
         titleLabel = new JLabel("Queues Management Application");
         titleLabel.setFont(new Font(Font.SANS_SERIF,Font.PLAIN,30));
+        titleLabel.setForeground(new Color(220, 174, 150));
         titlePanel.setLayout(new GridBagLayout());
         titlePanel.add(titleLabel);
 
 
         //setupPanel
         setupPanelUp = new JPanel();
-        setupPanelUp.setBackground(new Color(100,0,0));
+        setupPanelUp.setBackground(new Color(164, 147, 147));
+        //setupPanelUp.setOpaque(false);
         setupPanelUp.setLayout(new GridLayout(2,1));
 
         setupPanelUpUpper = new JPanel();
         setupPanelUpUpper.setLayout(new GridLayout(1,4));
+        setupPanelUp.setBorder(BorderFactory.createMatteBorder(40, 0, 0, 0, new Color(164, 147, 147)));
+        setupPanelUpUpper.setOpaque(false);
 
         setupPanelUpUpperLeft = new JPanel();
-        numberOfClientsLabel = new JLabel("Number of clients:");
-        numberOfClientsField = new JTextField("",5);
+        setupPanelUpUpperLeft.setOpaque(false);
+        numberOfClientsLabel = new JLabel("Number of Clients:");
+        numberOfClientsField = new JTextField("",3);
         setupPanelUpUpperLeft.add(numberOfClientsLabel);
         setupPanelUpUpperLeft.add(numberOfClientsField);
 
         setupPanelUpUpperRight = new JPanel();
-        numberOfServersLabel = new JLabel("Number of queues:");
-        numberOfServersField = new JTextField("",5);
+        setupPanelUpUpperRight.setOpaque(false);
+        numberOfServersLabel = new JLabel("Number of Queues:");
+        numberOfServersField = new JTextField("",3);
         setupPanelUpUpperRight.add(numberOfServersLabel);
         setupPanelUpUpperRight.add(numberOfServersField);
 
@@ -93,8 +100,10 @@ public class SetupFrame extends JFrame {
         setupPanelUpUpper.add(setupPanelUpUpperRight);
 
         setupPanelUpLower = new JPanel();
-        timeLimitLabel = new JLabel("Max time:");
-        timeLimitField = new JTextField("",5);
+        setupPanelUpLower.setOpaque(false);
+        setupPanelUpLower.setBorder(BorderFactory.createMatteBorder(10, 0, 0, 0, new Color(164, 147, 147)));
+        timeLimitLabel = new JLabel("Simulation Time Limit:");
+        timeLimitField = new JTextField("",3);
         setupPanelUpLower.add(timeLimitLabel);
         setupPanelUpLower.add(timeLimitField);
 
@@ -103,17 +112,19 @@ public class SetupFrame extends JFrame {
 
 
         setupPanelDown = new JPanel();
-        setupPanelDown.setBackground(new Color(80,0,200));
+        setupPanelDown.setBackground(new Color(164, 147, 147));
+        setupPanelDown.setBorder(BorderFactory.createMatteBorder(0, 0, 10, 0, new Color(164, 147, 147)));
+        //setupPanelDown.setOpaque(false);
         setupPanelDown.setLayout(new GridBagLayout());
 
-        minArrivalTimeLabel = new JLabel("Arrive from:");
-        minArrivalTimeField = new JTextField("",5);
-        maxArrivalTimeLabel = new JLabel("Arrive to:");
-        maxArrivalTimeField = new JTextField("",5);
-        minProcessingTimeLabel = new JLabel("Service from:");
-        minProcessingTimeField = new JTextField("",5);
-        maxProcessingTimeLabel = new JLabel("Service to:");
-        maxProcessingTimeField = new JTextField("",5);
+        minArrivalTimeLabel = new JLabel("Min. Arrival Time: ");
+        minArrivalTimeField = new JTextField("",3);
+        maxArrivalTimeLabel = new JLabel("   Max. Arrival Time: ");
+        maxArrivalTimeField = new JTextField("",3);
+        minProcessingTimeLabel = new JLabel("   Min. Service Time: ");
+        minProcessingTimeField = new JTextField("",3);
+        maxProcessingTimeLabel = new JLabel("   Max. Service Time: ");
+        maxProcessingTimeField = new JTextField("",3);
         setupPanelDown.add(minArrivalTimeLabel);
         setupPanelDown.add(minArrivalTimeField);
         setupPanelDown.add(maxArrivalTimeLabel);
@@ -125,20 +136,31 @@ public class SetupFrame extends JFrame {
 
         //buttonPanel
         buttonPanel = new JPanel();
-        buttonPanel.setBackground(new Color(0,0,100));
+        //buttonPanel.setBackground(new Color(0,0,100));
+        buttonPanel.setBorder(BorderFactory.createMatteBorder(30, 0, 0, 0, new Color(103, 89, 94)));
+        buttonPanel.setOpaque(false);
 
         validateAndStartButton = new JButton("Validate");
+        validateAndStartButton.setBackground(new Color(164, 147, 147));
+        validateAndStartButton.setFocusable(false);
+        validateAndStartButton.setPreferredSize(new Dimension(100,25));
         helpAndHaltButton = new JButton("Help");
+        helpAndHaltButton.setBackground(new Color(164, 147, 147));
+        helpAndHaltButton.setFocusable(false);
+        helpAndHaltButton.setPreferredSize(new Dimension(100,25));
 
         buttonPanel.add(validateAndStartButton);
         buttonPanel.add(helpAndHaltButton);
 
         //messagePanel
         messagePanel = new JPanel();
-        messagePanel.setBackground(new Color(0,150,200));
+        //messagePanel.setBackground(new Color(0,150,200));
+        messagePanel.setOpaque(false);
         messagePanel.setLayout(new GridBagLayout());
         messageLabel = new JLabel("");
         messageLabel.setFont(new Font(Font.SANS_SERIF,Font.PLAIN,15));
+        messageLabel.setForeground(new Color(220, 174, 150));
+        messageLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 100, 0, new Color(103, 89, 94)));
         messagePanel.add(messageLabel);
 
         contentPane.add(titlePanel);
@@ -218,5 +240,9 @@ public class SetupFrame extends JFrame {
 
     public void setHelpAndHaltButton(String text){
         helpAndHaltButton.setText(text);
+    }
+
+    public static void main(String[] args) {
+        new SetupFrame();
     }
 }
