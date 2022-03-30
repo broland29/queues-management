@@ -15,7 +15,7 @@ import java.util.concurrent.BlockingQueue;
 public class SimulationFrame extends JFrame {
 
     public static final int MAX_NUMBER_OF_CLIENTS_ON_GUI = 1000;
-    public static final int MAX_NUMBER_OF_WAITING_CLIENTS_ON_GUI = 10;
+    public static final int MAX_NUMBER_OF_WAITING_CLIENTS_ON_GUI = 5;
     public static final int MAX_NUMBER_OF_SERVERS_ON_GUI = 20;
     public static final int MAX_QUEUE_CAPACITY_ON_GUI = 5;
 
@@ -163,9 +163,9 @@ public class SimulationFrame extends JFrame {
         for (int i=0; i<servers.size(); i++) {
             BlockingQueue<Task> tasks = servers.get(i).getTasks();
             if (tasks.isEmpty()) {
-                smallLabels[0][i].setText("Slot empty");//can become empty only by finishing last task and having no other after
+                smallLabels[1][i].setText("Slot empty");//can become empty only by finishing last task and having no other after
             } else {
-                int j = 0;
+                int j = 1;//first cell name of queue
                 for (Task t : tasks){
                     String task = String.format("(%d,%d,%d)   ", t.getId(), t.getArrivalTime(), t.getServiceTime());
                     smallLabels[j][i].setText(task);

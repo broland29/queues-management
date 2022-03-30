@@ -10,82 +10,70 @@ import static business_logic.SimulationStatus.*;
 import static gui.TextFieldNames.*;
 
 public class Controller {
-    private SimulationManager simulationManager;
-    private SetupFrame frame;
+    private final SimulationManager simulationManager;
+    private final SetupFrame setupFrame;
 
-    private int clientCount;
-    private int queueCount;
-    private int maxTime;
-    private int arrivalIntervalFrom ;
-    private int arrivalIntervalTo;
-    private int serviceIntervalFrom;
-    private int serviceIntervalTo;
+    private int numberOfClients;
+    private int numberOfServers;
+    private int timeLimit;
+    private int minProcessingTime;
+    private int maxProcessingTime;
+    private int minArrivalTime;
+    private int maxArrivalTime;
 
-    public Controller(SimulationManager simulationManager) {
+
+    public Controller(SimulationManager simulationManager, SetupFrame setupFrame) {
         this.simulationManager = simulationManager;
-        frame = simulationManager.getFrame();
-
-        //fill with impossible values - is it needed?
-        clientCount = -1;
-        queueCount = -1;
-        maxTime = -1;
-        arrivalIntervalFrom = -1;
-        arrivalIntervalTo = -1;
-        serviceIntervalFrom = -1;
-        serviceIntervalTo = -1;
-
-        frame.addButtonListener(new ButtonListener());
+        this.setupFrame = setupFrame;
+        this.setupFrame.addButtonListener(new ButtonListener());
     }
 
     class ButtonListener implements ActionListener{
 
-        void validationRoutine(){
-            boolean valid = true;
+        private void validationRoutine(){
 
             //get integer values from gui
-
             try {
-                clientCount = frame.getText(CLIENT_COUNT);
-                queueCount = frame.getText(QUEUE_COUNT);
-                maxTime = frame.getText(MAX_TIME);
-                arrivalIntervalFrom = frame.getText(ARRIVAL_INTERVAL_FROM);
-                arrivalIntervalTo = frame.getText(ARRIVAL_INTERVAL_TO);
-                serviceIntervalFrom = frame.getText(SERVICE_INTERVAL_FROM);
-                serviceIntervalTo = frame.getText(SERVICE_INTERVAL_TO);
+                numberOfClients = setupFrame.getText(NUMBER_OF_CLIENTS);
+                numberOfServers = setupFrame.getText(NUMBER_OF_SERVERS);
+                timeLimit = setupFrame.getText(TIME_LIMIT);
+                minArrivalTime = setupFrame.getText(MIN_ARRIVAL_TIME);
+                maxArrivalTime = setupFrame.getText(MAX_ARRIVAL_TIME);
+                minProcessingTime = setupFrame.getText(MIN_PROCESSING_TIME);
+                maxProcessingTime = setupFrame.getText(MAX_PROCESSING_TIME);
             }catch (NumberFormatException | NegativeNumberException ne){
-                valid = false;
-                frame.setMessage(ne.getMessage());
+                setupFrame.setMessage(ne.getMessage());
+                return;
             }
 
             //further validate values
-            if (clientCount > SimulationManager.MAX_NUMBER_OF_CLIENTS) {
-                valid = false;
-                frame.setMessage(CLIENT_COUNT + " exceeds maximum allowed value.");
+            if (numberOfClients > SimulationManager.MAX_NUMBER_OF_CLIENTS) {
+                setupFrame.setMessage("Input " + NUMBER_OF_CLIENTS + " exceeds maximum allowed value.");
+                return;
             }
-            if (queueCount > SimulationManager.MAX_NUMBER_OF_SERVERS){
-                valid = false;
-                frame.setMessage(QUEUE_COUNT + " exceeds maximum allowed value.");
+            if (numberOfServers > SimulationManager.MAX_NUMBER_OF_SERVERS){
+                setupFrame.setMessage("Input" + NUMBER_OF_SERVERS + " exceeds maximum allowed value.");
+                return;
             }
-            if (maxTime > SimulationManager.MAX_TIME_LIMIT){
-                valid = false;
-                frame.setMessage(MAX_TIME + " exceeds maximum allowed value.");
+            if (timeLimit > SimulationManager.MAX_TIME_LIMIT){
+                setupFrame.setMessage("Input" + TIME_LIMIT + " exceeds maximum allowed value.");
+                return;
             }
-            if (arrivalIntervalFrom > arrivalIntervalTo){
-                valid = false;
-                frame.setMessage("(" + arrivalIntervalFrom + "," + arrivalIntervalTo + ") is not a valid interval.");
+            if (minArrivalTime > maxArrivalTime){
+                setupFrame.setMessage("(" + minArrivalTime + "," + maxArrivalTime + ") is not a valid interval.");
+                return;
             }
-            if (serviceIntervalFrom > serviceIntervalTo){
-                valid = false;
-                frame.setMessage("(" + serviceIntervalFrom + "," + serviceIntervalTo + ") is not a valid interval.");
+            if (minProcessingTime > maxProcessingTime){
+                setupFrame.setMessage("(" + minProcessingTime + "," + maxProcessingTime + ") is not a valid interval.");
+                return;
             }
 
-            //validations passed
-            if (valid){
-                frame.setMessage("Input validated. Press \"Start\" to begin.");
-                frame.setValidateAndStartButton("Start");
-                frame.setHelpAndHaltButton("Cancel");
-                simulationManager.setSimulationStatus(SimulationStatus.WAITING_FOR_START);
-            }
+            //reached here <=> validations passed
+
+            setupFrame.setMessage("Input validated. Press \"Start\" to begin.");
+            setupFrame.setValidateAndStartButton("Start");
+            setupFrame.setHelpAndHaltButton("Cancel");
+            simulationManager.setSimulationStatus(SimulationStatus.WAITING_FOR_START);
         }
 
         @Override
@@ -93,7 +81,7 @@ public class Controller {
 
             SimulationStatus status = simulationManager.getSimulationStatus();
 
-            if (e.getSource() == frame.getValidateAndStartButton()){
+            if (e.getSource() == setupFrame.getValidateAndStartButton()){
 
                 switch (status){
                     case WAITING_FOR_INFO:      //not validated yet
@@ -101,41 +89,41 @@ public class Controller {
                         break;
                     case WAITING_FOR_START:     //start not started yet
                         simulationManager.setSimulationStatus(RUNNING);
-                        frame.setMessage("Simulation is running.");
-                        frame.setValidateAndStartButton("Pause");
-                        frame.setHelpAndHaltButton("Help");
-                        SimulationManager.startSimulation(clientCount,queueCount,maxTime,arrivalIntervalFrom,arrivalIntervalTo,serviceIntervalFrom,serviceIntervalTo);
+                        setupFrame.setMessage("Simulation is running.");
+                        setupFrame.setValidateAndStartButton("Pause");
+                        setupFrame.setHelpAndHaltButton("Help");
+                        simulationManager.startSimulation(numberOfClients, numberOfServers, timeLimit, minArrivalTime, maxArrivalTime, minProcessingTime, maxProcessingTime);
                         break;
                     case PAUSED:                //pressed resume
                         simulationManager.setSimulationStatus(RUNNING);
-                        frame.setMessage("Simulation is running.");
-                        frame.setValidateAndStartButton("Pause");
-                        frame.setHelpAndHaltButton("Help");
+                        setupFrame.setMessage("Simulation is running.");
+                        setupFrame.setValidateAndStartButton("Pause");
+                        setupFrame.setHelpAndHaltButton("Help");
                         break;
                     case RUNNING:               //pressed pause
                         simulationManager.setSimulationStatus(SimulationStatus.PAUSED);
-                        frame.setMessage("Simulation paused.");
-                        frame.setValidateAndStartButton("Resume");
-                        frame.setHelpAndHaltButton("Halt");
+                        setupFrame.setMessage("Simulation paused.");
+                        setupFrame.setValidateAndStartButton("Resume");
+                        setupFrame.setHelpAndHaltButton("Halt");
                         break;
                 }
             }
 
-            else if (e.getSource() == frame.getHelpAndHaltButton()){
+            else if (e.getSource() == setupFrame.getHelpAndHaltButton()){
                 if (status == PAUSED){          //pressed halt
-                    frame.setMessage("Simulation halted.");
-                    frame.setValidateAndStartButton("Start");
-                    frame.setHelpAndHaltButton("Help");
+                    setupFrame.setMessage("Simulation halted.");
+                    setupFrame.setValidateAndStartButton("Start");
+                    setupFrame.setHelpAndHaltButton("Help");
                     simulationManager.setSimulationStatus(WAITING_FOR_INFO);
                 }
                 if (status == WAITING_FOR_START){
-                    frame.setMessage("Simulation canceled.");
-                    frame.setValidateAndStartButton("Start");
-                    frame.setHelpAndHaltButton("Help");
+                    setupFrame.setMessage("Simulation canceled.");
+                    setupFrame.setValidateAndStartButton("Start");
+                    setupFrame.setHelpAndHaltButton("Help");
                     simulationManager.setSimulationStatus(WAITING_FOR_INFO);
                 }
                 else if (status != PAUSED){
-                    frame.openHelp();
+                    setupFrame.openHelp();
                 }
             }
         }

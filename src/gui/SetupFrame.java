@@ -1,15 +1,11 @@
 package gui;
 
-import business_logic.SimulationManager;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.net.URI;
 
 public class SetupFrame extends JFrame {
-
-    final String HELP = "A project realised by broland29.";
 
     JFrame mainFrame;
     JPanel contentPane;
@@ -30,22 +26,22 @@ public class SetupFrame extends JFrame {
     JPanel setupPanelUpLower;
     //setupPanelDown is one single panel
 
-    JTextField clientCount;
-    JTextField queueCount;
-    JLabel clientCountLabel;
-    JLabel queueCountLabel;
+    JTextField numberOfClientsField;
+    JTextField numberOfServersField;
+    JLabel numberOfClientsLabel;
+    JLabel numberOfServersLabel;
 
-    JTextField maxTime;
-    JLabel maxTimeLabel;
+    JTextField timeLimitField;
+    JLabel timeLimitLabel;
 
-    JTextField arrivalIntervalFrom;
-    JTextField arrivalIntervalTo;
-    JTextField serviceIntervalFrom;
-    JTextField serviceIntervalTo;
-    JLabel arrivalIntervalFromLabel;
-    JLabel arrivalIntervalToLabel;
-    JLabel serviceIntervalFromLabel;
-    JLabel serviceIntervalToLabel;
+    JTextField minArrivalTimeField;
+    JTextField maxArrivalTimeField;
+    JTextField minProcessingTimeField;
+    JTextField maxProcessingTimeField;
+    JLabel minArrivalTimeLabel;
+    JLabel maxArrivalTimeLabel;
+    JLabel minProcessingTimeLabel;
+    JLabel maxProcessingTimeLabel;
 
     //buttonPanel related
     JButton validateAndStartButton;
@@ -82,25 +78,25 @@ public class SetupFrame extends JFrame {
         setupPanelUpUpper.setLayout(new GridLayout(1,4));
 
         setupPanelUpUpperLeft = new JPanel();
-        clientCountLabel = new JLabel("Number of clients:");
-        clientCount = new JTextField("",5);
-        setupPanelUpUpperLeft.add(clientCountLabel);
-        setupPanelUpUpperLeft.add(clientCount);
+        numberOfClientsLabel = new JLabel("Number of clients:");
+        numberOfClientsField = new JTextField("",5);
+        setupPanelUpUpperLeft.add(numberOfClientsLabel);
+        setupPanelUpUpperLeft.add(numberOfClientsField);
 
         setupPanelUpUpperRight = new JPanel();
-        queueCountLabel = new JLabel("Number of queues:");
-        queueCount = new JTextField("",5);
-        setupPanelUpUpperRight.add(queueCountLabel);
-        setupPanelUpUpperRight.add(queueCount);
+        numberOfServersLabel = new JLabel("Number of queues:");
+        numberOfServersField = new JTextField("",5);
+        setupPanelUpUpperRight.add(numberOfServersLabel);
+        setupPanelUpUpperRight.add(numberOfServersField);
 
         setupPanelUpUpper.add(setupPanelUpUpperLeft);
         setupPanelUpUpper.add(setupPanelUpUpperRight);
 
         setupPanelUpLower = new JPanel();
-        maxTimeLabel = new JLabel("Max time:");
-        maxTime = new JTextField("",5);
-        setupPanelUpLower.add(maxTimeLabel);
-        setupPanelUpLower.add(maxTime);
+        timeLimitLabel = new JLabel("Max time:");
+        timeLimitField = new JTextField("",5);
+        setupPanelUpLower.add(timeLimitLabel);
+        setupPanelUpLower.add(timeLimitField);
 
         setupPanelUp.add(setupPanelUpUpper);
         setupPanelUp.add(setupPanelUpLower);
@@ -110,22 +106,22 @@ public class SetupFrame extends JFrame {
         setupPanelDown.setBackground(new Color(80,0,200));
         setupPanelDown.setLayout(new GridBagLayout());
 
-        arrivalIntervalFromLabel = new JLabel("Arrive from:");
-        arrivalIntervalFrom = new JTextField("",5);
-        arrivalIntervalToLabel = new JLabel("Arrive to:");
-        arrivalIntervalTo = new JTextField("",5);
-        serviceIntervalFromLabel = new JLabel("Service from:");
-        serviceIntervalFrom = new JTextField("",5);
-        serviceIntervalToLabel = new JLabel("Service to:");
-        serviceIntervalTo = new JTextField("",5);
-        setupPanelDown.add(arrivalIntervalFromLabel);
-        setupPanelDown.add(arrivalIntervalFrom);
-        setupPanelDown.add(arrivalIntervalToLabel);
-        setupPanelDown.add(arrivalIntervalTo);
-        setupPanelDown.add(serviceIntervalFromLabel);
-        setupPanelDown.add(serviceIntervalFrom);
-        setupPanelDown.add(serviceIntervalToLabel);
-        setupPanelDown.add(serviceIntervalTo);
+        minArrivalTimeLabel = new JLabel("Arrive from:");
+        minArrivalTimeField = new JTextField("",5);
+        maxArrivalTimeLabel = new JLabel("Arrive to:");
+        maxArrivalTimeField = new JTextField("",5);
+        minProcessingTimeLabel = new JLabel("Service from:");
+        minProcessingTimeField = new JTextField("",5);
+        maxProcessingTimeLabel = new JLabel("Service to:");
+        maxProcessingTimeField = new JTextField("",5);
+        setupPanelDown.add(minArrivalTimeLabel);
+        setupPanelDown.add(minArrivalTimeField);
+        setupPanelDown.add(maxArrivalTimeLabel);
+        setupPanelDown.add(maxArrivalTimeField);
+        setupPanelDown.add(minProcessingTimeLabel);
+        setupPanelDown.add(minProcessingTimeField);
+        setupPanelDown.add(maxProcessingTimeLabel);
+        setupPanelDown.add(maxProcessingTimeField);
 
         //buttonPanel
         buttonPanel = new JPanel();
@@ -156,10 +152,6 @@ public class SetupFrame extends JFrame {
         mainFrame.setVisible(true);
     }
 
-    public void close(){
-        this.dispose();
-    }
-
     public void addButtonListener(ActionListener bl){
         validateAndStartButton.addActionListener(bl);
         helpAndHaltButton.addActionListener(bl);
@@ -176,7 +168,9 @@ public class SetupFrame extends JFrame {
     //open up the help popup
     public void openHelp(){
         final String[] options = {"Visit Me","Back"};
-        int input = JOptionPane.showOptionDialog(null, HELP, "Help", JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, 0);
+        String HELP = "A project realised by broland29.";
+        int input = JOptionPane.showOptionDialog(null, HELP, "Help", JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE, null, options, 0);
         if (input == JOptionPane.OK_OPTION){
             try{
                 Desktop.getDesktop().browse(new URI("https://github.com/broland29"));
@@ -189,30 +183,26 @@ public class SetupFrame extends JFrame {
 
     public int getText(TextFieldNames textFieldName) throws NumberFormatException{
 
-        String text;
+        String text = "";
         switch (textFieldName) {
-            case CLIENT_COUNT -> text = clientCount.getText();
-            case QUEUE_COUNT -> text = queueCount.getText();
-            case MAX_TIME-> text = maxTime.getText();
-            case ARRIVAL_INTERVAL_FROM -> text = arrivalIntervalFrom.getText();
-            case ARRIVAL_INTERVAL_TO-> text = arrivalIntervalTo.getText();
-            case SERVICE_INTERVAL_FROM -> text = serviceIntervalFrom.getText();
-            case SERVICE_INTERVAL_TO -> text = serviceIntervalTo.getText();
-            default -> {
-                System.out.println("Invalid input of getText. (SetupFrame)");
-                text = "";
-            }
+            case NUMBER_OF_CLIENTS -> text = numberOfClientsField.getText();
+            case NUMBER_OF_SERVERS -> text = numberOfServersField.getText();
+            case TIME_LIMIT -> text = timeLimitField.getText();
+            case MIN_ARRIVAL_TIME -> text = minArrivalTimeField.getText();
+            case MAX_ARRIVAL_TIME -> text = maxArrivalTimeField.getText();
+            case MIN_PROCESSING_TIME -> text = minProcessingTimeField.getText();
+            case MAX_PROCESSING_TIME -> text = maxProcessingTimeField.getText();
         }
 
         int value;
         try{
             value = Integer.parseInt(text);
         }catch (NumberFormatException nfe){
-            throw new NumberFormatException("Invalid input: " + textFieldName);
+            throw new NumberFormatException("Invalid " + textFieldName + ".");
         }
 
         if (value < 0){
-            throw new NegativeNumberException("Negative " + textFieldName + " not allowed");
+            throw new NegativeNumberException("Negative " + textFieldName + " not allowed.");
         }
 
         return value;
@@ -228,13 +218,5 @@ public class SetupFrame extends JFrame {
 
     public void setHelpAndHaltButton(String text){
         helpAndHaltButton.setText(text);
-    }
-
-    public void disableButton(){
-        validateAndStartButton.setEnabled(false);
-    }
-
-    public void enableButton(){
-        validateAndStartButton.setEnabled(true);
     }
 }
