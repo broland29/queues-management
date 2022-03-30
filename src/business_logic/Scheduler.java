@@ -36,7 +36,6 @@ public class Scheduler {
     }
 
     public int dispatchTask(Task t){
-        System.out.println("in dispatch");
         return strategy.addTask(servers,t);
     }
 

@@ -14,10 +14,9 @@ import java.util.concurrent.BlockingQueue;
 
 public class SimulationFrame extends JFrame {
 
-    public static final int MAX_NUMBER_OF_CLIENTS_ON_GUI = 1000;
+    public static final int MAX_NUMBER_OF_CLIENTS_ON_GUI = 5;
+    public static final int MAX_NUMBER_OF_SERVERS_ON_GUI = 5;
     public static final int MAX_NUMBER_OF_WAITING_CLIENTS_ON_GUI = 5;
-    public static final int MAX_NUMBER_OF_SERVERS_ON_GUI = 20;
-    public static final int MAX_QUEUE_CAPACITY_ON_GUI = 5;
 
     private final Font titleFont = new Font(Font.SANS_SERIF,Font.PLAIN,30);
     private final Font smallerFont = new Font(Font.SANS_SERIF,Font.PLAIN,20);
@@ -51,8 +50,8 @@ public class SimulationFrame extends JFrame {
     JLabel footerLabel;         //display waiting tasks
 
     public SimulationFrame(int numberOfQueues, int capacityOfQueues){
-        this.numberOfQueues = numberOfQueues;
-        this.capacityOfQueues = capacityOfQueues;
+        this.numberOfQueues = Math.min(numberOfQueues, MAX_NUMBER_OF_SERVERS_ON_GUI);
+        this.capacityOfQueues = Math.min(capacityOfQueues, MAX_NUMBER_OF_CLIENTS_ON_GUI);
 
         mainFrame = new JFrame("Queues Management Application");
         mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -187,9 +186,5 @@ public class SimulationFrame extends JFrame {
         rightLabel.setText("Average service time: " + averageServiceTime);
 
         footerLabel.setText("");
-    }
-
-    public static void main(String[] args) {
-        //new SimulationFrame();
     }
 }

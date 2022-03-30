@@ -13,6 +13,7 @@ import gui.SimulationFrame;
 import model.Server;
 import model.Task;
 
+import static business_logic.SelectionPolicy.SHORTEST_QUEUE;
 import static business_logic.SelectionPolicy.SHORTEST_TIME;
 
 
@@ -25,7 +26,7 @@ public class SimulationManager implements Runnable{
 
     //values hard-coded since not specified in problem statement
     public static final int QUEUE_CAPACITY = 5;
-    private final SelectionPolicy selectionPolicy = SHORTEST_TIME;
+    private final SelectionPolicy selectionPolicy = SHORTEST_QUEUE;
 
     //status of the simulation
     private SimulationStatus simulationStatus;
@@ -46,7 +47,7 @@ public class SimulationManager implements Runnable{
     private List<Task> generatedTasks;
 
     //hard-coded simulation customization
-    private static final int SECOND = 100;
+    private static final int SECOND = 1000;
     private static final int LOG_WIDTH = 10;
 
     //data needed to show details after simulation
@@ -238,6 +239,7 @@ public class SimulationManager implements Runnable{
                 printLogLine(bufferedWriter,"");
             }
         }
+        System.out.println(currentTime);
         printLogLine(bufferedWriter,"\n----------------------------------------\n");
     }
 
