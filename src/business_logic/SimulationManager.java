@@ -1,14 +1,17 @@
 package business_logic;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import gui.Controller;
 import gui.SetupFrame;
 import gui.SimulationFrame;
 import model.Server;
 import model.Task;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import static business_logic.SelectionPolicy.SHORTEST_TIME;
+
 
 public class SimulationManager implements Runnable{
 
@@ -16,36 +19,73 @@ public class SimulationManager implements Runnable{
     public static final int MAX_TIME_LIMIT = 200;
     public static final int MAX_NUMBER_OF_CLIENTS = 1000;
     public static final int MAX_NUMBER_OF_SERVERS = 20;
-    public static final int MAX_QUEUE_CAPACITY = 5;
 
+    //values hard-coded since not specified in problem statement
+    public static final int QUEUE_CAPACITY = 5;
+    private final SelectionPolicy selectionPolicy = SHORTEST_TIME;
+
+    //status of the simulation
     private SimulationStatus simulationStatus;
 
-    public int timeLimit;
-    public int maxProcessingTime;
-    public int minProcessingTime;
-    public int minArrivalTime;
-    public int maxArrivalTime;
-    public int numberOfServers;
-    public int numberOfClients;
-    public SelectionPolicy selectionPolicy;
+    //data from the GUI
+    private int timeLimit;
+    private int maxProcessingTime;
+    private int minProcessingTime;
+    private int minArrivalTime;
+    private int maxArrivalTime;
+    private int numberOfServers;
+    private int numberOfClients;
+
 
     private Scheduler scheduler;
     private final SetupFrame setupFrame;
     private SimulationFrame simulationFrame;
     private List<Task> generatedTasks;
 
-    public static final int SECOND = 1000;
-    public static final int LOG_WIDTH = 10;
+    //hard-coded simulation customization
+    private static final int SECOND = 1000;
+    private static final int LOG_WIDTH = 10;
 
+    //data needed to show details after simulation
+    private int totalWaitingTime;
+    private int totalServiceTime;
+    private int satisfiedClients;
+    private int peakHour;
+    private int mostNumberOfClients;
 
     public SimulationManager(SetupFrame setupFrame){
         this.setupFrame = setupFrame;
-
-        selectionPolicy = SelectionPolicy.SHORTEST_TIME;
         simulationStatus = SimulationStatus.WAITING_FOR_INFO;
 
+        totalWaitingTime = 0;
+        totalServiceTime = 0;
+        satisfiedClients = 0;
+        peakHour = 0;
+        mostNumberOfClients = 0;
     }
 
+    public void startSimulation(int numberOfClients, int numberOfServers, int timeLimit,
+                                int minArrivalTime, int maxArrivalTime,
+                                int minProcessingTime, int maxProcessingTime){
+
+        simulationStatus = SimulationStatus.RUNNING;
+
+        this.numberOfClients = numberOfClients;
+        this.numberOfServers = numberOfServers;
+        this.timeLimit = timeLimit;
+        this.minArrivalTime = minArrivalTime;
+        this.maxArrivalTime = maxArrivalTime;
+        this.minProcessingTime = minProcessingTime;
+        this.maxProcessingTime = maxProcessingTime;
+
+        scheduler = new Scheduler(numberOfServers, QUEUE_CAPACITY, selectionPolicy);
+        simulationFrame = new SimulationFrame(numberOfServers, QUEUE_CAPACITY);
+
+        generateRandomTasks();
+
+        Thread thread = new Thread(this);
+        thread.start();
+    }
 
     //comparator for sorting generated tasks
     private static class TaskComparator implements Comparator<Task>{
@@ -89,10 +129,15 @@ public class SimulationManager implements Runnable{
                     Task t = generatedTasks.get(i);
                     if (t.getArrivalTime() <= currentTime){ //also take tasks which may came earlier
 
-                        if (scheduler.dispatchTask(t) == 0) //only remove if successfully dispatched
+                        if (scheduler.dispatchTask(t) == 0){    //only remove if successfully dispatched
                             generatedTasks.remove(t);
-                        else
+                            satisfiedClients++;
+                        }
+
+                        else {
+                            totalWaitingTime += generatedTasks.size() - i;  //waiting outside of queue
                             break;  //if dispatching unsuccessful (i.e. all queues are full) no need to check for other tasks as well
+                        }
                     }
                     else
                         break;
@@ -103,6 +148,7 @@ public class SimulationManager implements Runnable{
                 printLog(currentTime);
                 if (simulationStatus == SimulationStatus.RUNNING)
                     simulationFrame.reDraw(currentTime,generatedTasks,scheduler.getServers());
+                scheduler.updateDetails(this,currentTime);
 
                 try {
                     Thread.sleep(SECOND);
@@ -110,40 +156,28 @@ public class SimulationManager implements Runnable{
                     e.printStackTrace();
                 }
 
-
-
-                if (currentTime == timeLimit){
-                    String terminationCause = "Time limit reached (" + timeLimit + ").";
-                    String tasksStatus;
-
-                    System.out.println(terminationCause);
-
-                    if (isJobDone())
-                        tasksStatus = "Tasks finished.";
-                    else
-                        tasksStatus = "Tasks not finished.";
-
-                    System.out.println(tasksStatus);
-
-                    simulationFrame.reDraw(currentTime,generatedTasks,scheduler.getServers());  //TODO: needed? else tasks not in last status
-                    simulationFrame.reDrawFinal(terminationCause,tasksStatus);
-
-                    //prepare for next simulation
-                    simulationStatus = SimulationStatus.WAITING_FOR_INFO;
-                    setupFrame.setMessage("Validate");
-                    //break;
-                }
                 if (isJobDone()){
                     String terminationCause = "Finished. " + currentTime + " seconds used out of " + timeLimit + ".";
                     System.out.println(terminationCause);
 
                     simulationFrame.reDraw(currentTime,generatedTasks,scheduler.getServers());  //TODO: needed? else tasks not in last status
-                    simulationFrame.reDrawFinal(terminationCause,"");
+                    simulationFrame.reDrawFinal(terminationCause,getAverageWaitingTime(),peakHour,getAverageServiceTime());
 
                     //prepare for next simulation
                     simulationStatus = SimulationStatus.WAITING_FOR_INFO;
                     setupFrame.setMessage("Validate");
-                    //break;
+                }
+                else if (currentTime == timeLimit){
+                    String terminationCause = "Time limit reached. Tasks not finished";
+
+                    System.out.println(terminationCause);
+
+                    simulationFrame.reDraw(currentTime,generatedTasks,scheduler.getServers());  //TODO: needed? else tasks not in last status
+                    simulationFrame.reDrawFinal(terminationCause,getAverageWaitingTime(),peakHour,getAverageServiceTime());
+
+                    //prepare for next simulation
+                    simulationStatus = SimulationStatus.WAITING_FOR_INFO;
+                    setupFrame.setMessage("Validate");
                 }
 
                 currentTime++;
@@ -199,37 +233,35 @@ public class SimulationManager implements Runnable{
         this.simulationStatus = simulationStatus;
     }
 
-
-
-    public void startSimulation(int numberOfClients, int numberOfServers, int timeLimit,
-                                int minArrivalTime, int maxArrivalTime,
-                                int minProcessingTime, int maxProcessingTime){
-
-        simulationStatus = SimulationStatus.RUNNING;
-
-        this.numberOfClients = numberOfClients;
-        this.numberOfServers = numberOfServers;
-        this.timeLimit = timeLimit;
-        this.minArrivalTime = minArrivalTime;
-        this.maxArrivalTime = maxArrivalTime;
-        this.minProcessingTime = minProcessingTime;
-        this.maxProcessingTime = maxProcessingTime;
-
-        scheduler = new Scheduler(numberOfServers,MAX_QUEUE_CAPACITY);
-        simulationFrame = new SimulationFrame(numberOfServers,MAX_QUEUE_CAPACITY);
-
-        generateRandomTasks();
-
-        Thread thread = new Thread(this);
-        thread.start();
-    }
-
     private void notifyServers(){
 
         List<Server> servers = scheduler.getServers();
         for (Server s : servers){
             s.decrementTime();
         }
+    }
+
+    public void addToTotalWaitingTime(int num){
+        totalWaitingTime += num;
+    }
+
+    public void addToTotalServiceTime(int num){
+        totalServiceTime += num;
+    }
+
+    public void checkIfPeakHour(int numberOfClients, int time){
+        if (numberOfClients > mostNumberOfClients){
+            mostNumberOfClients = numberOfClients;
+            peakHour = time;
+        }
+    }
+
+    private double getAverageWaitingTime() {
+        return (double)totalWaitingTime / satisfiedClients;
+    }
+
+    private double getAverageServiceTime() {
+        return (double)totalServiceTime / satisfiedClients;
     }
 
     public static void main(String[] args) {

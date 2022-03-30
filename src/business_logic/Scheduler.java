@@ -5,24 +5,26 @@ import model.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+
+import static business_logic.SelectionPolicy.*;
 
 public class Scheduler {
 
-    private List<Server> servers;
-    private int maxNoServers;
-    private int maxTasksPerServer;
-    private Strategy strategy;
+    private final List<Server> servers;
+    private final Strategy strategy;
 
-    private List<Thread> serverThreads;     //???
 
-    public Scheduler(){}
+    public Scheduler(int maxNoServers, int maxTasksPerServer, SelectionPolicy selectionPolicy){
 
-    public Scheduler(int maxNoServers, int maxTasksPerServer){
-        //make sure nothing is null
-        this.maxNoServers = maxNoServers;
-        this.maxTasksPerServer = maxTasksPerServer;
-        strategy = new ConcreteStrategyQueue();
-        serverThreads = new ArrayList<>();
+        if (selectionPolicy == SHORTEST_QUEUE)
+            strategy = new ConcreteStrategyQueue();
+        else if (selectionPolicy == SHORTEST_TIME)
+            strategy = new ConcreteStrategyTime();
+        else
+            strategy = new ConcreteStrategyTime();
+
+        List<Thread> serverThreads = new ArrayList<>();
 
         //create server objects and threads from them
         servers = new ArrayList<>();
@@ -30,15 +32,6 @@ public class Scheduler {
             servers.add(new Server(maxTasksPerServer,i));
             serverThreads.add(new Thread(servers.get(i)));
             serverThreads.get(i).start();
-        }
-    }
-
-    public void changeStrategy(SelectionPolicy policy){
-        if (policy == SelectionPolicy.SHORTEST_QUEUE){
-            strategy = new ConcreteStrategyQueue();
-        }
-        if (policy == SelectionPolicy.SHORTEST_TIME){
-            strategy = new ConcreteStrategyTime();
         }
     }
 
@@ -57,5 +50,23 @@ public class Scheduler {
                 return false;
         }
         return true;
+    }
+
+    public void updateDetails(SimulationManager simulationManager, int time){
+        int totalNumberOfTasks = 0;
+
+        for (Server s : servers){
+            if (s.isEmpty())
+                continue;
+
+            int numberOfTasks = s.getTasks().size();
+            totalNumberOfTasks += numberOfTasks;
+
+            simulationManager.addToTotalServiceTime(1);                 //first customer is service-waiting
+            simulationManager.addToTotalWaitingTime(numberOfTasks - 1); //other customers are just waiting
+
+        }
+
+        simulationManager.checkIfPeakHour(totalNumberOfTasks,time);
     }
 }

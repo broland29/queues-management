@@ -76,14 +76,12 @@ public class SimulationFrame extends JFrame {
 
         headerPanelDown = new JPanel();
         headerPanelDown.setLayout(new GridLayout(1,3));
-        leftLabel = new JLabel("average waiting time: ");
-        leftLabel.setFont(smallerFont);
+        leftLabel = new JLabel();
         leftLabel.setHorizontalAlignment(JLabel.CENTER);
-        middleLabel = new JLabel("peak hour: ");
+        middleLabel = new JLabel();
         middleLabel.setFont(smallerFont);
         middleLabel.setHorizontalAlignment(JLabel.CENTER);
-        rightLabel = new JLabel("average service time: ");
-        rightLabel.setFont(smallerFont);
+        rightLabel = new JLabel();
         rightLabel.setHorizontalAlignment(JLabel.CENTER);
         headerPanelDown.add(leftLabel);
         headerPanelDown.add(middleLabel);
@@ -177,14 +175,18 @@ public class SimulationFrame extends JFrame {
         }
     }
 
-    public void reDrawFinal(String terminationCause, String tasksStatus){
+    public void reDrawFinal(String terminationCause, double averageWaitingTime, int peakHour, double averageServiceTime){
         titleLabel.setText(terminationCause);
 
-        leftLabel.setText("<avg>");
-        middleLabel.setText("<peak>");
-        rightLabel.setText("<avg>");
+        leftLabel.setFont(smallestFont);
+        middleLabel.setFont(smallestFont);
+        rightLabel.setFont(smallestFont);
 
-        footerLabel.setText(tasksStatus);
+        leftLabel.setText("Average waiting time: " + averageWaitingTime);
+        middleLabel.setText("Peak hour: " + peakHour);
+        rightLabel.setText("Average service time: " + averageServiceTime);
+
+        footerLabel.setText("");
     }
 
     public static void main(String[] args) {
