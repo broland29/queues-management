@@ -1,7 +1,5 @@
 package model;
 
-import business_logic.SimulationManager;
-
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -9,36 +7,60 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Server implements Runnable{
     private BlockingQueue<Task> tasks;
     private AtomicInteger waitingPeriod;
+    private AtomicInteger currentTime;
+    int queueCapacity;
+    private Task currentTask;
     private final int id;
+    boolean processing;
+
+    public boolean isFull(){
+        return tasks.size() == queueCapacity;
+    }
 
     public Server(int maxTasksPerServer, int id){
+        queueCapacity = maxTasksPerServer;
         tasks = new ArrayBlockingQueue<Task>(maxTasksPerServer);
         waitingPeriod = new AtomicInteger(0);
+        currentTime = new AtomicInteger();
         this.id = id;
+        processing = false;
     }
 
     public void addTask(Task newTask){
-        tasks.add(newTask);
+        try {
+            tasks.put(newTask);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         waitingPeriod.getAndAdd(newTask.getServiceTime());
     }
 
     public void run(){
         while(true){
             try {
-                Task currentTask = tasks.peek();
+                Task checkTask = tasks.peek();
 
-                if (currentTask != null){
-                    while (currentTask.getServiceTime() != 0){
-                        Thread.sleep(SimulationManager.SECOND);
-                        currentTask.decrementServiceTime();
+                if (checkTask != null){
+                    currentTask = checkTask;
+                    currentTime.set(currentTask.getServiceTime());
+                    processing = true;
+
+                    while (currentTime.get() != 0){
                     }
 
-                    tasks.remove(currentTask);
+                    tasks.take();
                 }
 
             } catch (InterruptedException e) {
                 System.out.println("Server " + id + " was interrupted.");
             }
+        }
+    }
+
+    public void decrementTime(){
+        if (processing){
+            currentTime.getAndDecrement();
+            currentTask.decrementServiceTime();
         }
     }
 
@@ -51,7 +73,7 @@ public class Server implements Runnable{
     }
 
     public int getWaitingPeriod() {
-        return waitingPeriod.intValue();
+        return waitingPeriod.get();
     }
 
     public int getQueueSize(){

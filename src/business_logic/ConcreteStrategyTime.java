@@ -5,20 +5,46 @@ import model.Task;
 
 import java.util.List;
 
-public class ConcreteStrategyTime implements Strategy{
+public class ConcreteStrategyTime implements  Strategy{
+
+    int roli = 0;
+
     @Override
     public void addTask(List<Server> servers, Task t){
-        Server minimumTimeServer = servers.get(0);
+        int i = 0;
+        System.out.println("sup " + roli);
+        while (i < servers.size() && servers.get(i).isFull()){
+            System.out.println("Queue " + i + " is full.");
+            i++;
+        }
+
+        if (i == servers.size()){
+            System.out.println("All queues full");
+            return;
+        }
+
+        Server minimumTimeServer = servers.get(i);
         int minimumTime = minimumTimeServer.getWaitingPeriod();
 
-        for(int i=1; i< servers.size(); i++){
-            int wp = servers.get(i).getWaitingPeriod();
+        while(i < servers.size()){
+            Server server = servers.get(i);
+
+            if (server.isFull()){
+                i++;
+                continue;
+            }
+
+
+            int wp = server.getWaitingPeriod();
 
             if (wp < minimumTime){
                 minimumTime = wp;
-                minimumTimeServer = servers.get(i);
+                minimumTimeServer = server;
             }
+
+            i++;
         }
+
         minimumTimeServer.addTask(t);
     }
 }

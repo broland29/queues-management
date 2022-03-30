@@ -32,4 +32,8 @@ public class Task {
     public void decrementServiceTime(){
         serviceTime--;
     }
+
+    public boolean isDone(){
+        return serviceTime == 0;
+    }
 }

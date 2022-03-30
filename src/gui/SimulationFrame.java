@@ -14,6 +14,10 @@ import java.util.concurrent.BlockingQueue;
 
 public class SimulationFrame extends JFrame {
 
+    public static final int MAX_NUMBER_OF_CLIENTS_ON_GUI = 1000;
+    public static final int MAX_NUMBER_OF_SERVERS_ON_GUI = 20;
+    public static final int MAX_QUEUE_CAPACITY_ON_GUI = 5;
+
     private final Font titleFont = new Font(Font.SANS_SERIF,Font.PLAIN,30);
     private final Font smallerFont = new Font(Font.SANS_SERIF,Font.PLAIN,20);
     private final Border border = BorderFactory.createLineBorder(Color.black);

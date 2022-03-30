@@ -9,6 +9,7 @@ import model.Task;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SimulationManager implements Runnable{
     //limits defined in order to avoid huge simulations
@@ -32,12 +33,13 @@ public class SimulationManager implements Runnable{
     private Controller controller;
     private List<Task> generatedTasks;  //pool of tasks
 
-    public static final int SECOND = 3000;
+    public static final int SECOND = 100;
     public static final int LOG_WIDTH = 3;
 
     public SimulationManager(){
         //scheduler = new Scheduler(numberOfServers,20);  //TODO: find out what value
         frame = new SetupFrame();
+        scheduler = new Scheduler();
 //        controller = new Controller(this);
         generatedTasks = new ArrayList<>();
 //
@@ -87,10 +89,6 @@ public class SimulationManager implements Runnable{
 
         //sort them by their arrival time
         generatedTasks.sort(new TaskComparator());
-
-        //for(Task t : generatedTasks){
-        //   t.printTask();
-        //}
     }
 
     private boolean isJobDone(){
@@ -99,25 +97,29 @@ public class SimulationManager implements Runnable{
 
     @Override
     public void run(){
-        int currentTime = 0;
-        while (true){
 
+        int currentTime = 0;
+
+        while (true){
+            System.out.println(simulationStatus);
             if(simulationStatus == SimulationStatus.RUNNING){
                 int i = 0;
                 while(i<generatedTasks.size()){
                     Task t = generatedTasks.get(i);
                     if (t.getArrivalTime() == currentTime){
+                        //System.out.println("heyya");
                         scheduler.dispatchTask(t);
                         generatedTasks.remove(t);
                     }
                     else{
                         i++; //TODO: can break?
                     }
+                    //System.out.println("SUUUP");
                 }
 
                 printLog(currentTime);
-                if (simulationStatus == SimulationStatus.RUNNING)
-                    simulationFrame.reDraw(currentTime,generatedTasks,scheduler.getServers());
+                //if (simulationStatus == SimulationStatus.RUNNING)
+                //    simulationFrame.reDraw(currentTime,generatedTasks,scheduler.getServers());
 
                 try {
                     Thread.sleep(SECOND);
@@ -126,6 +128,7 @@ public class SimulationManager implements Runnable{
                 }
 
                 currentTime++;
+                notifyServers();
 
                 if (currentTime == timeLimit){
                     System.out.println("Time limit reached (" + timeLimit + ").");
@@ -152,7 +155,7 @@ public class SimulationManager implements Runnable{
             //else{
                 //System.out.println("Not running...");
             //}
-            //System.out.println(simulationStatus);
+            System.out.println(simulationStatus);
         }
     }
 
@@ -221,5 +224,17 @@ public class SimulationManager implements Runnable{
 
     public SetupFrame getFrame() {
         return frame;
+    }
+
+    public  List<Server> getServers(){
+        return scheduler.getServers();
+    }
+
+    private void notifyServers(){
+        //System.out.println("...");
+        List<Server> servers = scheduler.getServers();
+        for (Server s : servers){
+            s.decrementTime();
+        }
     }
 }

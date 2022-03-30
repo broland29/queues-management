@@ -15,6 +15,8 @@ public class Scheduler {
 
     private List<Thread> serverThreads;     //???
 
+    public Scheduler(){}
+
     public Scheduler(int maxNoServers, int maxTasksPerServer){
         //make sure nothing is null
         this.maxNoServers = maxNoServers;
@@ -41,6 +43,7 @@ public class Scheduler {
     }
 
     public void dispatchTask(Task t){
+        System.out.println("in dispatch");
         strategy.addTask(servers,t);
     }
 
