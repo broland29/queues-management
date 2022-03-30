@@ -7,17 +7,17 @@ import java.util.List;
 
 public class ConcreteStrategyQueue implements Strategy{
     @Override
-    public void addTask(List<Server> servers, Task t){
+    public int addTask(List<Server> servers, Task t){
         int i = 0;
 
         while (i < servers.size() && servers.get(i).isFull()){
-            System.out.println("Queue " + i + " is full.");
+            //System.out.println("Queue " + i + " is full.");
             i++;
         }
 
         if (i == servers.size()){
-            System.out.println("All queues full");
-            return;
+            //System.out.println("All queues full");
+            return -1;
         }
 
         Server minimumQueueServer = servers.get(0);
@@ -41,5 +41,6 @@ public class ConcreteStrategyQueue implements Strategy{
             i++;
         }
         minimumQueueServer.addTask(t);
+        return 0;
     }
 }

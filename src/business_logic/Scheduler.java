@@ -42,9 +42,9 @@ public class Scheduler {
         }
     }
 
-    public void dispatchTask(Task t){
+    public int dispatchTask(Task t){
         System.out.println("in dispatch");
-        strategy.addTask(servers,t);
+        return strategy.addTask(servers,t);
     }
 
     public  List<Server> getServers(){

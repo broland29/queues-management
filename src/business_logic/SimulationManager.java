@@ -33,17 +33,13 @@ public class SimulationManager implements Runnable{
     private Controller controller;
     private List<Task> generatedTasks;  //pool of tasks
 
-    public static final int SECOND = 100;
-    public static final int LOG_WIDTH = 3;
+    public static final int SECOND = 1000;
+    public static final int LOG_WIDTH = 10;
 
     public SimulationManager(){
-        //scheduler = new Scheduler(numberOfServers,20);  //TODO: find out what value
         frame = new SetupFrame();
         scheduler = new Scheduler();
-//        controller = new Controller(this);
         generatedTasks = new ArrayList<>();
-//
-//        generateNRandomTask();
     }
 
     public SimulationManager(int clientCount, int queueCount, int maxTime,
@@ -60,8 +56,8 @@ public class SimulationManager implements Runnable{
         minProcessingTime = serviceIntervalFrom;
         maxProcessingTime = serviceIntervalTo;
 
-        scheduler = new Scheduler(numberOfServers,5);  //TODO: find out what value
-        simulationFrame = new SimulationFrame(numberOfServers,5);
+        scheduler = new Scheduler(numberOfServers,MAX_QUEUE_CAPACITY);  //TODO: find out what value
+        simulationFrame = new SimulationFrame(numberOfServers,MAX_QUEUE_CAPACITY);
         controller = new Controller(this);
         generatedTasks = new ArrayList<>();
 
@@ -101,25 +97,27 @@ public class SimulationManager implements Runnable{
         int currentTime = 0;
 
         while (true){
-            System.out.println(simulationStatus);
+            //System.out.println(simulationStatus);
             if(simulationStatus == SimulationStatus.RUNNING){
                 int i = 0;
                 while(i<generatedTasks.size()){
                     Task t = generatedTasks.get(i);
-                    if (t.getArrivalTime() == currentTime){
-                        //System.out.println("heyya");
-                        scheduler.dispatchTask(t);
-                        generatedTasks.remove(t);
+                    if (t.getArrivalTime() <= currentTime){ //also take tasks which may came earlier
+
+                        if (scheduler.dispatchTask(t) == 0) //only remove if successfully dispatched
+                            generatedTasks.remove(t);
+                        else
+                            break;  //if dispatching unsuccessful (i.e. all queues are full) no need to check for other tasks as well
                     }
-                    else{
-                        i++; //TODO: can break?
-                    }
-                    //System.out.println("SUUUP");
+                    else
+                        break;
+
+
                 }
 
                 printLog(currentTime);
-                //if (simulationStatus == SimulationStatus.RUNNING)
-                //    simulationFrame.reDraw(currentTime,generatedTasks,scheduler.getServers());
+                if (simulationStatus == SimulationStatus.RUNNING)
+                    simulationFrame.reDraw(currentTime,generatedTasks,scheduler.getServers());
 
                 try {
                     Thread.sleep(SECOND);
@@ -127,35 +125,46 @@ public class SimulationManager implements Runnable{
                     e.printStackTrace();
                 }
 
-                currentTime++;
-                notifyServers();
+
 
                 if (currentTime == timeLimit){
-                    System.out.println("Time limit reached (" + timeLimit + ").");
-                    if (isJobDone()){
-                        System.out.println("Tasks finished.");
-                    }
-                    else{
-                        System.out.println("Tasks not finished.");
-                    }
+                    String terminationCause = "Time limit reached (" + timeLimit + ").";
+                    String tasksStatus;
+
+                    System.out.println(terminationCause);
+
+                    if (isJobDone())
+                        tasksStatus = "Tasks finished.";
+                    else
+                        tasksStatus = "Tasks not finished.";
+
+                    System.out.println(tasksStatus);
+
+                    simulationFrame.reDraw(currentTime,generatedTasks,scheduler.getServers());  //TODO: needed? else tasks not in last status
+                    simulationFrame.reDrawFinal(terminationCause,tasksStatus);
 
                     //prepare for next simulation
                     simulationStatus = SimulationStatus.WAITING_FOR_INFO;
                     frame.setMessage("Validate");
-                    break;
+                    //break;
                 }
                 if (isJobDone()){
-                    System.out.println("Tasks finished before reaching time limit (" + timeLimit + ").");
+                    String terminationCause = "Tasks finished before reaching time limit (" + timeLimit + ").";
+                    System.out.println(terminationCause);
+
+                    simulationFrame.reDraw(currentTime,generatedTasks,scheduler.getServers());  //TODO: needed? else tasks not in last status
+                    simulationFrame.reDrawFinal(terminationCause,"");
+
                     //prepare for next simulation
                     simulationStatus = SimulationStatus.WAITING_FOR_INFO;
                     frame.setMessage("Validate");
-                    break;
+                    //break;
                 }
+
+                currentTime++;
+                notifyServers();
             }
-            //else{
-                //System.out.println("Not running...");
-            //}
-            System.out.println(simulationStatus);
+            //System.out.println(simulationStatus);
         }
     }
 

@@ -15,11 +15,13 @@ import java.util.concurrent.BlockingQueue;
 public class SimulationFrame extends JFrame {
 
     public static final int MAX_NUMBER_OF_CLIENTS_ON_GUI = 1000;
+    public static final int MAX_NUMBER_OF_WAITING_CLIENTS_ON_GUI = 10;
     public static final int MAX_NUMBER_OF_SERVERS_ON_GUI = 20;
     public static final int MAX_QUEUE_CAPACITY_ON_GUI = 5;
 
     private final Font titleFont = new Font(Font.SANS_SERIF,Font.PLAIN,30);
     private final Font smallerFont = new Font(Font.SANS_SERIF,Font.PLAIN,20);
+    private final Font smallestFont = new Font(Font.SANS_SERIF,Font.PLAIN,15);
     private final Border border = BorderFactory.createLineBorder(Color.black);
     //private final Border border = BorderFactory.createMatteBorder(2, 1, 2, 1, Color.BLACK);
     private final int WAITING_WIDTH = 5;
@@ -122,7 +124,7 @@ public class SimulationFrame extends JFrame {
 
         footerPanel = new JPanel();
         footerLabel = new JLabel("Waiting tasks:");
-        footerLabel.setFont(smallerFont);
+        footerLabel.setFont(smallestFont);
         footerPanel.add(footerLabel);
         footerPanel.setBackground(Color.MAGENTA);
 
@@ -136,21 +138,27 @@ public class SimulationFrame extends JFrame {
     }
 
     public void reDraw(int currentTime, List<Task> generatedTasks, List<Server> servers){
-        middleLabel.setText("Time left: " + currentTime);
+        leftLabel.setText("");
+        middleLabel.setText("Simulation time: " + currentTime);
+        rightLabel.setText("");
 
-        String waitingClients = "Waiting clients:\n";
+        String waitingClients = "";
         String client;
 
-        int inOneRow = 0;
+        int numberOfWaitingTasks = 0;
         for(Task t : generatedTasks){
-            client = String.format("(%d,%d,%d)   ", t.getId(), t.getArrivalTime(), t.getServiceTime());
+            client = String.format("(%d,%d,%d) ", t.getId(), t.getArrivalTime(), t.getServiceTime());
             waitingClients = waitingClients.concat(client);
-            inOneRow++;
-            if (inOneRow == WAITING_WIDTH) {
-                waitingClients = waitingClients + "\n";
-                inOneRow = 0;
-            }
+            numberOfWaitingTasks++;
+            if (numberOfWaitingTasks == MAX_NUMBER_OF_WAITING_CLIENTS_ON_GUI)
+                break;
         }
+        if (waitingClients.isEmpty())
+            waitingClients = "No waiting clients";
+        else
+            waitingClients = "Waiting clients: " + waitingClients;
+
+        footerLabel.setText(waitingClients);
 
         for (int i=0; i<servers.size(); i++) {
             BlockingQueue<Task> tasks = servers.get(i).getTasks();
@@ -163,8 +171,20 @@ public class SimulationFrame extends JFrame {
                     smallLabels[j][i].setText(task);
                     j++;
                 }
+                if (j < capacityOfQueues)
+                    smallLabels[j][i].setText("Slot empty");
             }
         }
+    }
+
+    public void reDrawFinal(String terminationCause, String tasksStatus){
+        titleLabel.setText(terminationCause);
+
+        leftLabel.setText("<avg>");
+        middleLabel.setText("<peak>");
+        rightLabel.setText("<avg>");
+
+        footerLabel.setText(tasksStatus);
     }
 
     public static void main(String[] args) {
