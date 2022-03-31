@@ -1,11 +1,9 @@
 package model;
 
-import business_logic.SimulationManager;
-
 public class Task {
-    private int arrivalTime;
+    private final int arrivalTime;
     private int serviceTime;
-    private int id;
+    private final int id;
 
     public Task(int arrivalTime, int serviceTime, int id) {
         this.arrivalTime = arrivalTime;
@@ -25,15 +23,8 @@ public class Task {
         return id;
     }
 
-    public void printTask(){
-        System.out.println("Arrival time: " + arrivalTime + "\nService Time: " + serviceTime + "\n");
-    }
-
     public void decrementServiceTime(){
         serviceTime--;
     }
 
-    public boolean isDone(){
-        return serviceTime == 0;
-    }
 }

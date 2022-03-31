@@ -11,12 +11,10 @@ public class ConcreteStrategyQueue implements Strategy{
         int i = 0;
 
         while (i < servers.size() && servers.get(i).isFull()){
-            //System.out.println("Queue " + i + " is full.");
             i++;
         }
 
         if (i == servers.size()){
-            //System.out.println("All queues full");
             return -1;
         }
 

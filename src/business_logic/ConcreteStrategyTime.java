@@ -7,19 +7,15 @@ import java.util.List;
 
 public class ConcreteStrategyTime implements  Strategy{
 
-    int roli = 0;
 
     @Override
     public int addTask(List<Server> servers, Task t){
         int i = 0;
-        System.out.println("sup " + roli);
         while (i < servers.size() && servers.get(i).isFull()){
-            System.out.println("Queue " + i + " is full.");
             i++;
         }
 
         if (i == servers.size()){
-            System.out.println("All queues full");
             return -1;
         }
 

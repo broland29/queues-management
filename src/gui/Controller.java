@@ -72,7 +72,7 @@ public class Controller {
 
             setupFrame.setMessage("Input validated. Press \"Start\" to begin.");
             setupFrame.setValidateAndStartButton("Start");
-            setupFrame.setHelpAndHaltButton("Cancel");
+            setupFrame.setHelpAndHaltButton("Help");
             simulationManager.setSimulationStatus(SimulationStatus.WAITING_FOR_START);
         }
 
@@ -83,50 +83,28 @@ public class Controller {
 
             if (e.getSource() == setupFrame.getValidateAndStartButton()){
 
-                switch (status){
-                    case WAITING_FOR_INFO:      //not validated yet
-                        validationRoutine();
-                        break;
-                    case WAITING_FOR_START:     //start not started yet
+                switch (status) {
+                    case WAITING_FOR_INFO ->      //not validated yet
+                            validationRoutine();
+                    case WAITING_FOR_START -> {     //start not started yet
                         simulationManager.setSimulationStatus(RUNNING);
                         setupFrame.setMessage("Simulation is running.");
-                        setupFrame.setValidateAndStartButton("Pause");
+                        setupFrame.setValidateAndStartButton("Halt");
                         setupFrame.setHelpAndHaltButton("Help");
                         simulationManager.startSimulation(numberOfClients, numberOfServers, timeLimit, minArrivalTime, maxArrivalTime, minProcessingTime, maxProcessingTime);
-                        break;
-                    case PAUSED:                //pressed resume
-                        simulationManager.setSimulationStatus(RUNNING);
-                        setupFrame.setMessage("Simulation is running.");
-                        setupFrame.setValidateAndStartButton("Pause");
+                    }
+                    case RUNNING -> {               //pressed halt
+                        simulationManager.setSimulationStatus(WAITING_FOR_INFO);
+                        setupFrame.setMessage("Simulation halted.");
+                        setupFrame.setValidateAndStartButton("Validate");
                         setupFrame.setHelpAndHaltButton("Help");
-                        break;
-                    case RUNNING:               //pressed pause
-                        simulationManager.setSimulationStatus(SimulationStatus.PAUSED);
-                        setupFrame.setMessage("Simulation paused.");
-                        setupFrame.setValidateAndStartButton("Resume");
-                        setupFrame.setHelpAndHaltButton("Halt");
-                        break;
+                    }
                 }
             }
 
-            else if (e.getSource() == setupFrame.getHelpAndHaltButton()){
-                if (status == PAUSED){          //pressed halt
-                    setupFrame.setMessage("Simulation halted.");
-                    setupFrame.setValidateAndStartButton("Start");
-                    setupFrame.setHelpAndHaltButton("Help");
-                    simulationManager.setSimulationStatus(WAITING_FOR_INFO);
-                }
-                if (status == WAITING_FOR_START){
-                    setupFrame.setMessage("Simulation canceled.");
-                    setupFrame.setValidateAndStartButton("Start");
-                    setupFrame.setHelpAndHaltButton("Help");
-                    simulationManager.setSimulationStatus(WAITING_FOR_INFO);
-                }
-                else if (status != PAUSED){
-                    setupFrame.openHelp();
-                }
+            if (e.getSource() == setupFrame.getHelpAndHaltButton()){
+                setupFrame.openHelp();
             }
         }
     }
-
 }

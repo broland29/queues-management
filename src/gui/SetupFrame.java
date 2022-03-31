@@ -1,6 +1,7 @@
 package gui;
 
 import javax.swing.*;
+import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.net.URI;
@@ -189,10 +190,11 @@ public class SetupFrame extends JFrame {
 
     //open up the help popup
     public void openHelp(){
-        final String[] options = {"Visit Me","Back"};
-        String HELP = "A project realised by broland29.";
-        int input = JOptionPane.showOptionDialog(null, HELP, "Help", JOptionPane.OK_CANCEL_OPTION,
-                    JOptionPane.INFORMATION_MESSAGE, null, options, 0);
+        //UIManager UI=new UIManager();
+        //UI.put("OptionPane.background",new ColorUIResource(255,0,0));
+        //UI.put("Panel.background",new ColorUIResource(255,0,0));
+
+        int input = JOptionPane.showConfirmDialog(null,getHelpPopup(),"Help",JOptionPane.OK_CANCEL_OPTION,JOptionPane.PLAIN_MESSAGE);
         if (input == JOptionPane.OK_OPTION){
             try{
                 Desktop.getDesktop().browse(new URI("https://github.com/broland29"));
@@ -201,6 +203,32 @@ public class SetupFrame extends JFrame {
                 System.out.println("Something went wrong");
             }
         }
+    }
+
+    private JPanel getHelpPopup(){
+        UIManager.put("OptionPane.background",new Color(103, 89, 94));
+        UIManager.put("Panel.background",new Color(103, 89, 94));
+        UIManager.put("Button.background", new Color(164, 147, 147));
+
+        JPanel helpPanel = new JPanel();
+        helpPanel.setPreferredSize(new Dimension(250,320));
+
+        //String HELP = ;
+
+        JLabel helpLabel = new JLabel("<html>Java Application for simulating real-time<br>" +
+                "queue evolution based on different app-<br>roaches.<br><br>" +
+                "Input the necessary data for the simula-<br>tion, validate it, then press enter." +
+                "<br><br>NOTE: some settings can be changed<br>only through code." +
+                "<br><br>WARNING: may not function well for<br>huge inputs.<br><br><br>" +
+                "For further information, check the docu-<br>mentation.<br><br>" +
+                "A project realised by broland29.<br>Visit me!<br><br></html>");
+        helpLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        helpLabel.setVerticalAlignment(SwingConstants.CENTER);
+        helpLabel.setForeground(new Color(220, 174, 150));
+        helpPanel.add(helpLabel);
+
+        //helpPanel.setBackground(new Color(103, 89, 94));
+        return helpPanel;
     }
 
     public int getText(TextFieldNames textFieldName) throws NumberFormatException{

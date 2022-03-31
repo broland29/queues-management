@@ -5,13 +5,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Server implements Runnable{
-    private BlockingQueue<Task> tasks;
-    private AtomicInteger waitingPeriod;
-    private AtomicInteger currentTime;
-    int queueCapacity;
+    private final BlockingQueue<Task> tasks;
+    private final AtomicInteger waitingPeriod;
+    private final AtomicInteger currentTime;
+    private final int queueCapacity;
     private Task currentTask;
     private final int id;
-    boolean processing;
+    private boolean processing;
 
     public boolean isFull(){
         return tasks.size() == queueCapacity;
@@ -19,7 +19,7 @@ public class Server implements Runnable{
 
     public Server(int maxTasksPerServer, int id){
         queueCapacity = maxTasksPerServer;
-        tasks = new ArrayBlockingQueue<Task>(maxTasksPerServer);
+        tasks = new ArrayBlockingQueue<>(maxTasksPerServer);
         waitingPeriod = new AtomicInteger(0);
         currentTime = new AtomicInteger();
         this.id = id;
@@ -66,10 +66,6 @@ public class Server implements Runnable{
 
     public BlockingQueue<Task> getTasks() {
         return tasks;
-    }
-
-    public void printServer(){
-        System.out.println("Server: " + id);
     }
 
     public int getWaitingPeriod() {

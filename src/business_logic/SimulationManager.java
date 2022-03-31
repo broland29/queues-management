@@ -13,8 +13,7 @@ import gui.SimulationFrame;
 import model.Server;
 import model.Task;
 
-import static business_logic.SelectionPolicy.SHORTEST_QUEUE;
-import static business_logic.SelectionPolicy.SHORTEST_TIME;
+import static business_logic.SelectionPolicy.*;
 
 
 public class SimulationManager implements Runnable{
