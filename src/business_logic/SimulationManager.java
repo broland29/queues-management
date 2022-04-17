@@ -187,6 +187,8 @@ public class SimulationManager implements Runnable{
                     simulationFrame.reDraw(currentTime,generatedTasks,scheduler.getServers());  //TODO: needed? else tasks not in last status
                     simulationFrame.reDrawFinal(terminationCause,getAverageWaitingTime(),peakHour,getAverageServiceTime());
 
+                    //TODO: stop thread
+
                     //prepare for next simulation
                     simulationStatus = SimulationStatus.WAITING_FOR_INFO;
                     setupFrame.setMessage("Validate");
