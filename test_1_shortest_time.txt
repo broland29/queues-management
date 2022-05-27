@@ -1,0 +1,364 @@
+Time: 0
+
+Waiting clients:
+(1,13,3)   (0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 1
+
+Waiting clients:
+(1,13,3)   (0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 2
+
+Waiting clients:
+(1,13,3)   (0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 3
+
+Waiting clients:
+(1,13,3)   (0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 4
+
+Waiting clients:
+(1,13,3)   (0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 5
+
+Waiting clients:
+(1,13,3)   (0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 6
+
+Waiting clients:
+(1,13,3)   (0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 7
+
+Waiting clients:
+(1,13,3)   (0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 8
+
+Waiting clients:
+(1,13,3)   (0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 9
+
+Waiting clients:
+(1,13,3)   (0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 10
+
+Waiting clients:
+(1,13,3)   (0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 11
+
+Waiting clients:
+(1,13,3)   (0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 12
+
+Waiting clients:
+(1,13,3)   (0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 13
+
+Waiting clients:
+(0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+(1,13,3)   
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 14
+
+Waiting clients:
+(0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+(1,13,2)   
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 15
+
+Waiting clients:
+(0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+(1,13,1)   
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 16
+
+Waiting clients:
+(0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 17
+
+Waiting clients:
+(0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 18
+
+Waiting clients:
+(0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 19
+
+Waiting clients:
+(0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 20
+
+Waiting clients:
+(0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 21
+
+Waiting clients:
+(0,22,2)   (2,22,3)   (3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 22
+
+Waiting clients:
+(3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+(0,22,2)   (2,22,3)   
+
+----------------------------------------
+
+Time: 23
+
+Waiting clients:
+(3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+(0,22,1)   (2,22,3)   
+
+----------------------------------------
+
+Time: 24
+
+Waiting clients:
+(3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+(2,22,3)   
+
+----------------------------------------
+
+Time: 25
+
+Waiting clients:
+(3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+(2,22,2)   
+
+----------------------------------------
+
+Time: 26
+
+Waiting clients:
+(3,27,2)   
+
+Queue 0:
+closed
+Queue 1:
+(2,22,1)   
+
+----------------------------------------
+
+Time: 27
+
+Waiting clients:
+
+Queue 0:
+(3,27,2)   
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 28
+
+Waiting clients:
+
+Queue 0:
+(3,27,1)   
+Queue 1:
+closed
+
+----------------------------------------
+
+Time: 29
+
+Waiting clients:
+
+Queue 0:
+closed
+Queue 1:
+closed
+
+----------------------------------------
+
+Finished. 29 seconds used out of 60.
+
+Average waiting time: 0.5
+Peak hour: 22
+Average service time: 2.5
+
+Copyright: broland29
